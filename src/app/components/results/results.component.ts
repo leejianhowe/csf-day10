@@ -11,8 +11,8 @@ import { CountryInfo, NewsInfo, NewsTable } from '../shared/model';
 export class ResultsComponent implements OnInit {
   code: string;
   results: NewsTable[];
-  articles: NewsInfo[] = []
-  name: string = ''
+  articles: NewsInfo[] = [];
+  name: string = '';
   constructor(
     private activatedRoute: ActivatedRoute,
     private http: HttpClient,
@@ -23,22 +23,26 @@ export class ResultsComponent implements OnInit {
     this.code = this.activatedRoute.snapshot.paramMap.get('code');
     console.log(this.code);
     this.results = await this.newsDatabase.getNews(this.code);
-    // console.log('results comp', this.results)
-    this.pushArticles()
-    this.name = await this.newsDatabase.countryName(this.code)
+    console.log('results comp', this.results)
+    await this.pushArticles();
+    this.name = await this.newsDatabase.countryName(this.code);
   }
-  
-  saveArticle(index) {
-    const id = this.results[index].id
-    this.newsDatabase.saveArticle(id)
-    
+
+  async saveArticle(index) {
+    const id = this.results[index].id;
+    this.newsDatabase.saveArticle(id);
+    this.results = await this.newsDatabase.getNews(this.code);
   }
 
   pushArticles() {
+    // let counter = 0
     for (let i = 0; i < this.results.length; i++) {
-      let data = this.results[i].article
-      // console.log(data)
-      this.articles.push(data)
+      if (this.results[i].article != undefined) {
+        let data = this.results[i].article;
+        // counter++
+        // console.log(counter)
+        this.articles.push(data);
+      }
     }
   }
 }

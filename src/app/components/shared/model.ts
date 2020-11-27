@@ -24,7 +24,8 @@ export interface NewsInfo{
 export interface NewsTable{
     article: NewsInfo,
     country: string
-    save?: boolean,
-    id?: string
+    save?: number,
+    id?: string,
+    time?: number
 
 }

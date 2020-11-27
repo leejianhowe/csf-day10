@@ -1,20 +1,22 @@
-<h3>News from {{name}} </h3>
-<div class="list-group" *ngFor="let item of articles;let index=index">
-    <div class="list-group-item">
-        <div class="row">
-            <div class="col-4">
-                <img style="width: 100%;"src="{{item.image}}" alt="">
-            </div>
-            <div class="col-8">
-                
-                <h5>{{item.title}}|{{item.source}}</h5>
-                <a (click)="saveArticle(index)">Save</a>
-                <p>{{item.author}}</p>
-                <p>{{item.description}}</p>
-                <a target="_blank" href="{{item.url}}">Link to website</a>
-                <p>Published on: {{item.date}}</p>
-                <p>Snippet: {{item.content}}</p>
-            </div>
-        </div>
+<h3>News from {{ name }}</h3>
+<button type="button" [routerLink]="['/countries']">Back</button>
+<div class="list-group" *ngFor="let item of articles; let index = index">
+  <div class="list-group-item">
+    <div class="row">
+      <div class="col-4">
+        <img style="width: 100%" src="{{ item.image }}" alt="" />
+      </div>
+      <div class="col-8">
+        <h5>{{ item.title }}|{{ item.source }}</h5>
+        <a [ngStyle]="{'color':results[index].save == '1' ? 'green' : 'red' }" (click)="saveArticle(index)"
+          >Save</a
+        >
+        <p>{{ item.author }}</p>
+        <p>{{ item.description }}</p>
+        <a target="_blank" href="{{ item.url }}">Link to website</a>
+        <p>Published on: {{ item.date }}</p>
+        <p>Snippet: {{ item.content }}</p>
+      </div>
     </div>
+  </div>
 </div>

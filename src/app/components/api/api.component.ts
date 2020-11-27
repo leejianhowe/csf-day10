@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 })
 export class ApiComponent implements OnInit {
   apiKey: string;
-  retrievedData: apiKey
+  retrievedData: apiKey;
   form: FormGroup;
   constructor(
     private newsDataBase: NewsDatabase,
@@ -19,9 +19,8 @@ export class ApiComponent implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
-    this.createForm()
-    await this.getData()
-
+    this.createForm();
+    await this.getData();
   }
   createForm() {
     this.form = this.fb.group({
@@ -33,9 +32,9 @@ export class ApiComponent implements OnInit {
     this.retrievedData = await this.newsDataBase.getKey();
     console.log('retrieved', this.retrievedData);
     if (this.retrievedData == null) {
-      return
+      return;
     } else {
-      this.form.get('apiKey').setValue(this.retrievedData.apiKey)
+      this.form.get('apiKey').setValue(this.retrievedData.apiKey);
     }
   }
 
@@ -45,24 +44,24 @@ export class ApiComponent implements OnInit {
 
   add() {
     const apiKey = this.form.value as apiKey;
-    if(this.retrievedData){
-      apiKey.id = this.retrievedData.id
+    if (this.retrievedData) {
+      apiKey.id = this.retrievedData.id;
     } else {
-      apiKey.id = 1
+      apiKey.id = 1;
     }
     console.log('apiKey', apiKey);
     this.newsDataBase.addKey(apiKey);
     this.goCountries();
   }
   delete() {
-    const index = this.retrievedData.id
-    this.newsDataBase.deleteKey(index)
-    this.retrievedData = null
-    this.form.get('apiKey').setValue('')
+    const index = this.retrievedData.id;
+    this.newsDataBase.deleteKey(index);
+    this.retrievedData = null;
+    this.form.get('apiKey').setValue('');
   }
 
   back() {
-    this.form.reset()
-    this.router.navigate(['/countries'])
+    this.form.reset();
+    this.router.navigate(['/countries']);
   }
 }

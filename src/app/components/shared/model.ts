@@ -20,3 +20,11 @@ export interface NewsInfo{
     content: string,
 
 }
+
+export interface NewsTable{
+    article: NewsInfo,
+    country: string
+    save?: boolean,
+    id?: string
+
+}

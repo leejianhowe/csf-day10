@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Dexie } from 'dexie';
-import { apiKey, CountryInfo, NewsInfo } from './model';
-
+import { apiKey, CountryInfo, NewsInfo, NewsTable } from './model';
+import { v4 as uuid } from 'uuid';
 @Injectable()
 export class NewsDatabase extends Dexie {
   countryList: string[];
   private apiKey: Dexie.Table<apiKey, number>;
   private country: Dexie.Table<CountryInfo, number>;
+  private news: Dexie.Table<NewsTable, string>;
   constructor(private http: HttpClient) {
     // super call for extends Dexie name of db is searchDB
     super('newsDB');
@@ -15,32 +16,67 @@ export class NewsDatabase extends Dexie {
     this.version(1).stores({
       apiKey: 'id',
       country: '++id',
+      news: 'id,country',
     });
     // this.search refer to the table
     this.apiKey = this.table('apiKey');
     this.country = this.table('country');
+    this.news = this.table('news');
   }
+
+  async saveArticle(id: string) {
+    const article = await this.news.get(id);
+    article.save = !article.save;
+    console.log('updated article', article);
+    this.news.put(article);
+  }
+
+  //get country name
+  async countryName(code: string) {
+    const name = await this.country.toArray();
+    const found = name.find((ele) => ele.code == code);
+    return found.name;
+  }
+
+  // get news
   async getNews(code: string) {
     const apiKey = await this.apiKey.get(1);
-    const results = await this.http
-      .get(
-        `https://newsapi.org/v2/top-headlines?country=${code}&apiKey=${apiKey.apiKey}&pageSize=30`
-      )
-      .toPromise();
-    // console.log('news results from API', results);
-    const news: NewsInfo[] = results['articles'].map((ele) => {
-      return {
-        source: ele.source.name,
-        author: ele.author,
-        title: ele.title,
-        description: ele.description,
-        url: ele.url,
-        image: ele.urlToImage,
-        date: ele.publishedAt,
-        content: ele.content,
-      };
-    });
-    return news
+    const check = await this.news.where('country').equals(code).count();
+    console.log(check);
+    if (check != 0) {
+      console.log('news from db');
+      const news = this.news.where('country').equals(code).toArray();
+      return news;
+    } else {
+      const results = await this.http
+        .get(
+          `https://newsapi.org/v2/top-headlines?country=${code}&apiKey=${apiKey.apiKey}&pageSize=30`
+        )
+        .toPromise();
+      // console.log('news results from API', results);
+      const news: NewsTable[] = results['articles'].map((ele) => {
+        const id = uuid();
+        const x = {
+          article: {
+            source: ele.source.name,
+            author: ele.author,
+            title: ele.title,
+            description: ele.description,
+            url: ele.url,
+            image: ele.urlToImage,
+            date: ele.publishedAt,
+            content: ele.content,
+          },
+          save: false,
+          id: id,
+          country: code,
+        };
+        this.news.put(x);
+        return x;
+      });
+      console.log('news from api', news);
+      return news;
+    }
   }
   // get country code from restcountries
   async getCountries() {

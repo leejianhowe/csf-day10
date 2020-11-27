@@ -1,32 +1,91 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Dexie } from 'dexie';
-import { apiKey } from './model';
+import { apiKey, CountryInfo, NewsInfo } from './model';
 
 @Injectable()
 export class NewsDatabase extends Dexie {
+  countryList: string[];
   private apiKey: Dexie.Table<apiKey, number>;
-
+  private country: Dexie.Table<CountryInfo, number>;
   constructor(private http: HttpClient) {
     // super call for extends Dexie name of db is searchDB
     super('newsDB');
     //setup schema for v1
     this.version(1).stores({
-      apiKey: '++id',
+      apiKey: 'id',
+      country: '++id',
     });
     // this.search refer to the table
     this.apiKey = this.table('apiKey');
+    this.country = this.table('country');
   }
+  async getNews(code: string) {
+    const apiKey = await this.apiKey.get(1);
+    const results = await this.http
+      .get(
+        `https://newsapi.org/v2/top-headlines?country=${code}&apiKey=${apiKey.apiKey}&pageSize=30`
+      )
+      .toPromise();
+    // console.log('news results from API', results);
+    const news: NewsInfo[] = results['articles'].map((ele) => {
+      return {
+        source: ele.source.name,
+        author: ele.author,
+        title: ele.title,
+        description: ele.description,
+        url: ele.url,
+        image: ele.urlToImage,
+        date: ele.publishedAt,
+        content: ele.content,
+      };
+    });
+    return news
+  }
+  // get country code from restcountries
+  async getCountries() {
+    const checkCountry = await this.country.count();
+    console.log(checkCountry);
+    if (checkCountry === 0) {
+      const results = await this.http
+        .get<any[]>(
+          'https://restcountries.eu/rest/v2/alpha?codes=ae;ar;at;au;be;bg;br;ca;ch;cn;co;cu;cz;de;eg;fr;gb;gr;hk;hu;id;ie;il;in;it;jp;kr;lt;lv;ma;mx;my;ng;nl;no;nz;ph;pl;pt;ro;rs;ru;sa;se;sg;si;sk;th;tr;tw;ua;us;ve;za'
+        )
+        .toPromise();
 
+      console.log('results from restcountries', results);
+      const cc = results.map((ele) => {
+        return {
+          name: ele.name,
+          code: ele.alpha2Code.toLowerCase(),
+          flag: ele.flag,
+        };
+      });
+      console.log('cc', cc);
+      cc.forEach((ele) => {
+        this.country.put(ele);
+      });
+      return cc;
+    } else {
+      console.log('results from db');
+      return this.country.toArray();
+    }
+  }
   addKey(key: apiKey) {
     console.log(key);
     this.apiKey.put(key);
   }
   async getKey() {
     const counter = await this.apiKey.count();
-    console.log('counter', counter)
-    if (counter > 0) {
-      return counter;
+    console.log('counter', counter);
+    if (counter == 1) {
+      return this.apiKey.get(1);
+    } else {
+      return null;
     }
+  }
+
+  deleteKey(index: number) {
+    this.apiKey.delete(index);
   }
 }

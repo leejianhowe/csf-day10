@@ -1,7 +1,13 @@
 <h3>API Settings</h3>
 <form [formGroup]="form">
-    <input type="text" placeholder="Enter API Key" formControlName="apiKey">
-    <button (click)="add()">Add</button>
-    <button>Delete</button>
-    <button>Back</button>
+  <input type="text" placeholder="Enter API Key" formControlName="apiKey" />
+  <button type="button" [disabled]="form.invalid" (click)="add()">Add</button>
+  <div *ngIf="retrievedData">
+    <div *ngIf="form.get('apiKey').valid">
+      <button type="button" [disabled]="form.invalid" (click)="delete()">
+        Delete
+      </button>
+    </div>
+  </div>
+  <button type="button" (click)="back()">Back</button>
 </form>

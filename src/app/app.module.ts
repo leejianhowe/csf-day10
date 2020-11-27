@@ -16,7 +16,7 @@ import { ResultsComponent } from './components/results/results.component';
 const ROUTES = [
   { path: '', component: ApiComponent },
   { path: 'countries', component: CountriesComponent },
-  { path: 'results', component: ResultsComponent },
+  { path: 'results/:code', component: ResultsComponent },
   { path: '**', redirectTo: '/', pathMatch: 'full' },
 ];
 

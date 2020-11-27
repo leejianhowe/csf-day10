@@ -1,1 +1,18 @@
-<p>results works!</p>
+<h3>News from {{code}} </h3>
+<div class="list-group" *ngFor="let item of results">
+    <div class="list-group-item">
+        <div class="row">
+            <div class="col-4">
+                <img style="width: 100%;"src="{{item.image}}" alt="">
+            </div>
+            <div class="col-8">
+                <h5>{{item.title}}|{{item.source}}</h5>
+                <p>{{item.author}}</p>
+                <p>{{item.description}}</p>
+                <a target="_blank" href="{{item.url}}">Link to website</a>
+                <p>Published on: {{item.date}}</p>
+                <p>Snippet: {{item.content}}</p>
+            </div>
+        </div>
+    </div>
+</div>
